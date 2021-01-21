@@ -1,5 +1,8 @@
 #! /usr/bin/env python3
 
+from time import sleep
+from math import ceil
+import random
 from dotenv import load_dotenv
 import os
 from webClient import *
@@ -90,44 +93,72 @@ class WebSocketClient():
                 if message["data"]["redemption"]["reward"]["id"] == FIRE_EVENT_ID:
                     user = message["data"]["redemption"]["user"]["display_name"]
                     print("kittens")
-                    self.kittens(user)
+                    l = asyncio.create_task(self.kittens(user))
         elif dictionary.get("topic") == BITS:
             bit_data = message["data"]
             user = bit_data["user_name"]
             chat_message = bit_data["chat_message"]
             number_of_bits = bit_data["bits_used"]
             if FIRE_COMMAND.lower() in chat_message.lower():
-                self.bits(user, number_of_bits)
+                asyncio.create_task(self.bits(user, number_of_bits))
 
-    def kittens(self, user):
-        # TODO: Kittens gambling portion
-        # TODO: Only fire if the gun has ammo
-        # print firing
-        print("Test in kittens")
-        loop = asyncio.get_running_loop()
-        loop.create_task(self.fire(user, 3))
+    async def kittens(self, user):
+        # The prelude
+        self.irc.send_message(f"@{user} sacrificed a bag of kittens to the cannon gods.")
+        # Check for ammo
+        if self.gunner.rounds > 0:
+            # Kittens have a one in 40 chance of firing
+            if random.randint(1, 40) == 1:
+                self.irc.send_message("The gods purr fondly at the devotion of @{user} and unleash the cannon.")
+                # Kitten redemptions can only fire 3 rounds
+                await self.fire(user, 3)
+            # Send a failure message
+            else:
+                self.irc.send_message(f"The gods have smote @{user} for their arrogance")
+        # Send a failure message if there is no ammo.
+        else:
+            self.irc.send_message("The gunner is out of ammo. Always use the !ammo command before attempting to fire.")
 
 
-
-    def bits(self, user, number_of_bits):
-        #TODO: Bits gambling portion
-        loop = asyncio.get_running_loop()
-        loop.create_task(self.fire(user, 3))
+    async def bits(self, user, number_of_bits):
+        # The prelude
+        self.irc.send_message(f"@{user} hands {number_of_bits} drachmas to the gatekeeper and steps into the dragon's lair.")
+        # Check for ammo
+        if self.gunner.rounds > 0:
+            dollars = number_of_bits / 100 + 2
+            # More dollars, better odds
+            r = random.randint(1, 100//dollars)
+            print(r)
+            if r == 1:
+                try:
+                    # More dollars, more rounds fired. Up to half of the dollars gambled plus 3
+                    rounds = 3 + ceil(random.randint(0, dollars)/2)
+                    # Send a success message
+                    self.irc.send_message(f"@{user} unleashes a hail of gunfire, striking the Red Dragon with {rounds} rounds.")
+                    # Only up to ten rounds can be fired though
+                    await self.fire(user, min(10, rounds))
+                except Exception as e:
+                    print(e)
+            # Pithy failure message
+            else:
+                self.irc.send_message(f"@{user} tried to fire their weapon at the Red Dragon but was struck down mercilessly")
+        # Remind users to check ammo before gambling
+        else:
+            self.irc.send_message("The gunner is out of ammo. Always use the !ammo command before attempting to fire.")
 
     async def fire(self, user, rounds):
         if self.gunner.rounds > 0:
             print(f'Firing {rounds} rounds')
-            await self.irc.send_message(f'Firing {rounds} rounds')
             self.gunner.fire(rounds)
-            await self.irc.send_message(f"{rounds} have been fired, {self.gunner.rounds} remaining.")
+            self.irc.send_message(f"{rounds} have been fired, {self.gunner.rounds} remaining.")
             # Wait 20 seconds
-            await asyncio.sleep(20)
+            asyncio.sleep(20)
             print("Slept for 20 seconds")
             # create a clip
             clip_id = create_clip()
             print(clip_id)
             # Wait fifteen seconds
-            await asyncio.sleep(15)
+            asyncio.sleep(15)
             print("slept for 15 seconds")
             # Get the clip url
             clip_url = get_clip_url(clip_id)
@@ -138,8 +169,6 @@ class WebSocketClient():
                 print(post_discord(f'Watch Red get blasted by {user}', clip_url))
                 self.irc.send_message(f'This firing event has been clipped, check it out on discord.')
             print("End of firing.")
-        else:
-            self.irc.send
     def cleanup(self):
         self.gunner.cleanup()
         self.irc.cleanup()
