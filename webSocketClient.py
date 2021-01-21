@@ -38,7 +38,6 @@ class WebSocketClient():
             message = {"type": "LISTEN", "nonce": str(self.generate_nonce()), "data":{"topics": self.topics, "auth_token": AUTH_TOKEN}}
             json_message = json.dumps(message)
             await self.sendMessage(json_message)
-            return self.connection
 
     def generate_nonce(self):
         '''Generate pseudo-random number and seconds since epoch (UTC).'''
@@ -50,12 +49,12 @@ class WebSocketClient():
         '''Sending message to webSocket server'''
         await self.connection.send(message)
 
-    async def receiveMessage(self, connection):
+    async def receiveMessage(self):
         '''Receiving all server messages and handling them'''
         while True:
             try:
                 print("awaiting websocket")
-                message = await connection.recv()
+                message = await self.connection.recv()
                 print('Received message from server: ' + str(message))
                 dictionary = json.loads(message)
                 if "data" in dictionary:
@@ -68,7 +67,7 @@ class WebSocketClient():
                 print("Error Parsing JSON")
                 print(e)
 
-    async def heartbeat(self, connection):
+    async def heartbeat(self):
         '''
         Sending heartbeat to server every 1 minutes
         Ping - pong messages to verify/keep connection is alive
@@ -79,10 +78,10 @@ class WebSocketClient():
                 data_set = {"type": "PING"}
                 json_request = json.dumps(data_set)
                 print(json_request)
-                await connection.send(json_request)
+                await self.connection.send(json_request)
                 await asyncio.sleep(60)
             except websockets.exceptions.ConnectionClosed:
-                print('Connection with server closed')
+                self.connect()
     
     async def process_events(self, dictionary):
         if "message" in dictionary:
@@ -109,7 +108,7 @@ class WebSocketClient():
         if self.gunner.rounds > 0:
             # Kittens have a one in 40 chance of firing
             if random.randint(1, 40) == 1:
-                self.irc.send_message("The gods purr fondly at the devotion of @{user} and unleash the cannon.")
+                self.irc.send_message(f"The gods purr fondly at the devotion of @{user} and unleash the cannon.")
                 # Kitten redemptions can only fire 3 rounds
                 await self.fire(user, 3)
             # Send a failure message
@@ -123,6 +122,9 @@ class WebSocketClient():
     async def bits(self, user, number_of_bits):
         # The prelude
         self.irc.send_message(f"@{user} hands {number_of_bits} drachmas to the gatekeeper and steps into the dragon's lair.")
+        if number_of_bits < 100:
+            self.irc.send_message(f"The gatekeeper shakes his head at you and sends you away. You must pay at least 100 drachmas to enter the layer.")
+            return
         # Check for ammo
         if self.gunner.rounds > 0:
             dollars = number_of_bits / 100 + 2

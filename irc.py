@@ -23,17 +23,20 @@ class IRC:
         wait = 1
         while True:
             try:
-                self.reader, self.writer = await asyncio.wait_for(asyncio.open_connection(hostname, port, ssl=context), timeout=wait)
-                print("opened")
+                self.reader, self.writer = await asyncio.open_connection(hostname, port, ssl=context)
+            except ConnectionError:
+                asyncio.sleep(wait)
+                wait *= 2
+                print(f"Could not connect, increasing wait to {wait} and trying again.")
+                continue
+            try:
                 self.writer.write(f"PASS {OAUTH}\n".encode())
                 self.writer.write(f"NICK {user}\n".encode())
                 await self.writer.drain()
                 self.writer.write(f"JOIN {channel}\n".encode())
                 await self.writer.drain()
-            except asyncio.TimeoutError:
-                wait *= 2
-                print(wait)
-            except Exception as e:
+            except ConnectionError as e:
+                print("Connection errored out, got the following exception:")
                 print(e)
                 continue
             break
@@ -49,20 +52,18 @@ class IRC:
                     self.send_message(f"The dart turret has {self.gunner.rounds} rounds remaining.")
                 if message:
                     print(message)
-            except Exception as e:
+            except ConnectionError as e:
                 print(f"In receiving irc: {e}")
-                pass
+                self.connect()
     def send_message(self, message):
         if not TEST:
-            self.writer.write(f"PRIVMSG {channel} :{message}\n".encode())
-            asyncio.create_task(self.writer.drain())
+            try:
+                self.writer.write(f"PRIVMSG {channel} :{message}\n".encode())
+                asyncio.create_task(self.writer.drain())
+            except ConnectionError as e:
+                print("In irc send_message, connection errored out, got the following exception:")
+                print(e)
         else:
             print(message)
-    async def heartbeat(self):
-        while True:
-            print("beating irc")
-            await self.writer.write(b"PONG :tmi.twitch.tv\n")
-            await self.writer.drain()
-            await asyncio.sleep(60)
     def cleanup(self):
         pass
