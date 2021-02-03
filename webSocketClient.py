@@ -129,7 +129,7 @@ class WebSocketClient():
         if self.gunner.rounds > 0:
             dollars = number_of_bits / 100 + 2
             # More dollars, better odds
-            r = random.randint(1, 100//dollars)
+            r = random.randint(1, max(2, 100//dollars))
             print(r)
             if r == 1:
                 try:
