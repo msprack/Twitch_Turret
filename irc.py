@@ -57,7 +57,7 @@ class IRC:
                     self.send_message(f"The dart turret has {self.gunner.rounds} rounds remaining.")
                 if message.startswith(":streamlabs!streamlabs@streamlabs.tmi.twitch.tv"):
                     print("streamlabs")
-                    if "just donated" in message:
+                    if "just tipped" in message:
                         print("donation")
                         user = message.split()[3][1:]
                         dollars = float(message.split()[-1][1:-1])
