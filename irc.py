@@ -56,7 +56,9 @@ class IRC:
                 if "!ammo" in message:
                     self.send_message(f"The dart turret has {self.gunner.rounds} rounds remaining.")
                 if message.startswith(":streamlabs!streamlabs@streamlabs.tmi.twitch.tv"):
+                    print("streamlabs")
                     if "just donated" in message:
+                        print("donation")
                         user = message.split()[3][1:]
                         dollars = float(message.split()[-1][1:-1])
                         self.send_message(f"@{user} hands {int(dollars * 100)} drachmas to the gatekeeper and steps into the dragon's lair.")
