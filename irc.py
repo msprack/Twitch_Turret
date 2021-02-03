@@ -62,7 +62,7 @@ class IRC:
                         user = message.split()[3][1:]
                         dollars = float(message.split()[-1][1:-1])
                         self.send_message(f"@{user} hands {int(dollars * 100)} drachmas to the gatekeeper and steps into the dragon's lair.")
-                        if  dollars < 100.0:
+                        if  dollars < 1.00:
                             self.send_message(f"The gatekeeper shakes his head at you and sends you away. You must pay at least 100 drachmas to enter the layer.")
                             return
                         # Check for ammo
