@@ -35,6 +35,7 @@ class IRC:
             try:
                 self.writer.write(f"PASS {OAUTH}\n".encode())
                 self.writer.write(f"NICK {user}\n".encode())
+                print("nick and pass")
                 await self.writer.drain()
                 self.writer.write(f"JOIN {channel}\n".encode())
                 await self.writer.drain()
@@ -59,7 +60,7 @@ class IRC:
                         dollars = float(message.split()[-1][1:])
                         self.send_message(f"@{user} hands {int(dollars * 100)} drachmas to the gatekeeper and steps into the dragon's lair.")
                         if  dollars < 100.0:
-                            self.irc.send_message(f"The gatekeeper shakes his head at you and sends you away. You must pay at least 100 drachmas to enter the layer.")
+                            self.send_message(f"The gatekeeper shakes his head at you and sends you away. You must pay at least 100 drachmas to enter the layer.")
                             return
                         # Check for ammo
                         if self.gunner.rounds > 0:
