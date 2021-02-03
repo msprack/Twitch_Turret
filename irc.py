@@ -34,6 +34,7 @@ class IRC:
                 continue
             try:
                 self.writer.write(f"PASS {OAUTH}\n".encode())
+                await self.writer.drain()
                 self.writer.write(f"NICK {user}\n".encode())
                 print("nick and pass")
                 await self.writer.drain()
