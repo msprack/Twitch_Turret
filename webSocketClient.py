@@ -98,8 +98,7 @@ class WebSocketClient():
             user = bit_data["user_name"]
             chat_message = bit_data["chat_message"]
             number_of_bits = bit_data["bits_used"]
-            if FIRE_COMMAND.lower() in chat_message.lower():
-                asyncio.create_task(self.bits(user, number_of_bits))
+            asyncio.create_task(self.bits(user, number_of_bits))
 
     async def kittens(self, user):
         # The prelude
