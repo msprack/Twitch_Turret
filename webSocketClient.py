@@ -122,7 +122,7 @@ class WebSocketClient():
         # The prelude
         self.irc.send_message(f"@{user} hands {number_of_bits} drachmas to the gatekeeper and steps into the dragon's lair.")
         if number_of_bits < 100:
-            self.irc.send_message(f"The gatekeeper shakes his head at you and sends you away. You must pay at least 100 drachmas to enter the layer.")
+            self.irc.send_message(f"The gatekeeper shakes his head at you and sends you away. You must pay at least 100 drachmas to enter the lair.")
             return
         # Check for ammo
         if self.gunner.rounds > 0:
