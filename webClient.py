@@ -5,6 +5,7 @@ import requests
 import json
 BASE_API = "https://api.twitch.tv/helix/"
 
+load_dotenv()
 DISCORD_HOOK = os.getenv("DISCORD_HOOK")
 AUTH_TOKEN=os.getenv("AUTH_TOKEN")
 CLIENT_ID = os.getenv("CLIENT_ID")
@@ -43,5 +44,6 @@ def post_discord(message: str, link: str) -> str:
             }
         ]
     })
+    print(DISCORD_HOOK)
     r = requests.post(DISCORD_HOOK, data, headers = header)
     return r.text
