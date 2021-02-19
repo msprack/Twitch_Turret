@@ -7,4 +7,6 @@ Twitch Turret is a python script that interfaces with Twitch's API to monitor ch
 * Use the twitch API to to clip the 30 second window around the firing of the dart gun.
 * Use discord webhooks to post a link to the twitch clip to a discord server  
   
-## [See this project in action](https://drive.google.com/file/d/1_cftDxLpTPuHTmL-ci7bYri_EEQSXF_N/view?usp=sharing)  
+## See this project in action
+* [Hardware Software Interface Test](https://drive.google.com/file/d/1_cftDxLpTPuHTmL-ci7bYri_EEQSXF_N/view?usp=sharing)  
+* [Firing On Stream](https://clips.twitch.tv/StrangeEnticingEchidnaPartyTime-g7Gok5pt0rkqeLyT)
